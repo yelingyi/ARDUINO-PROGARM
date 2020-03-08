@@ -28,6 +28,7 @@ void loop() {
   char key = keypad.getKey();
   if (key != NO_KEY)
   {
+    
     if (key == '*')
       input = ' ';
     else if (key == '#') {
