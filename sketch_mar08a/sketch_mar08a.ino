@@ -22,13 +22,12 @@ void setup ()
   lcd.backlight(); //设置LCD背景等亮
   input = ' ';
 }
-
 void loop() {
   lcd.clear();
   char key = keypad.getKey();
   if (key != NO_KEY)
   {
-    
+
     if (key == '*')
       input = ' ';
     else if (key == '#') {
