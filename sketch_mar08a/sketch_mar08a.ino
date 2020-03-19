@@ -4,6 +4,9 @@
 #include <SPI.h>
 #include <SD.h>
 #include <Keypad.h>  //加载库
+
+
+
 const byte ROWS = 4;
 const byte COLS = 4;
 char keys[ROWS][COLS] = {
@@ -19,61 +22,71 @@ Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 String input, Filename;
 File myFile;
 bool started = false;
-DS1302 rtc(2, 3, 4);
+DS1302 rtc(17, 18, 19);
+Time t;
+
+
+
 void setup ()
 {
-    rtc.setTime(22, 47, 30);
+  rtc.halt(false);
+  rtc.writeProtect(false);
+  rtc.setTime(22, 47, 30);
 
   Serial.begin(9600);
   lcd.init(); // 初始化LCD
   lcd.backlight(); //设置LCD背景等亮
   input = ' ';
   SDcardinit();
-//  fileReBuild();
+  //  fileReBuild();
 }
 void loop() {
-    while (Serial.available() > 0)
-      timeinit();
-    lcd.clear();
-    char key = keypad.getKey();
-    if (key != NO_KEY)
-    {
+  t = rtc.getTime();
+  /*while (Serial.available() > 0)
+    timeinit();*/
+  char key = keypad.getKey();
+  if (key != NO_KEY)
+  {
 
-      if (key == '*')
-        input = ' ';
-      else if (key == '#') {
-        if (input != ' ') {
-          Serial.println("Nunber:" + input);
-          myFile = SD.open("AREA000.txt", FILE_WRITE);
-          if (myFile) {
-
-            myFile.println("Nunber:" + input);
-            //myFile.println("testing 1, 2, 3.");
-            myFile.close();
-            Serial.println("done.");
-          }
-
-          input = ' ';
+    if (key == '*')
+      input = ' ';
+    else if (key == '#') {
+      if (input != ' ') {
+        Serial.println("Nunber:" + input);
+        myFile = SD.open("AREA000.txt", FILE_WRITE);
+        if (myFile) {
+          myFile.print(rtc.getTimeStr());
+          myFile.println("访问，学号:" + input);
+          //myFile.println("testing 1, 2, 3.");
+          myFile.close();
+          Serial.println("done.");
         }
-      }
-      else
-      {
-        input = input + key;
-        //Serial.println(input);
+        return input;
+        input = ' ';
       }
     }
-    lcd.print ("PleaseEnterYour");
-    lcd.setCursor(0, 1);
-    lcd.print ("Nunber:");
-    lcd.setCursor(8, 1);
-    lcd.print(rtc.getTimeStr());
-    lcd.setCursor(7, 1);
-    lcd.print(input);
-    delay(100);
+    else
+    {
+      input = input + key;
+      //Serial.println(input);
+    }
+  }
+  if (input == " A")
+    timeget();
+  lcd.clear();
+  lcd.print ("PleaseEnterYour");
+  lcd.setCursor(0, 1);
+  lcd.print ("Nunber:");
+  lcd.setCursor(8, 1);
+  //lcd.print(t.sec, DEC);
+  Serial.println(rtc.getTimeStr());
+  lcd.setCursor(7, 1);
+  lcd.print(input);
+  delay(100);
 }
 void SDcardinit()
 {
-  Serial.print("Initializing SD card...");
+  Serial.println("Initializing SD card...");
   lcd.print("SD init");
   if (!SD.begin(4)) {
     Serial.println("initialization failed!");
@@ -102,28 +115,65 @@ void SDcardinit()
   }
   delay (1000);
 }
-void timeinit ()
+
+void timeget()
 {
-  int year,month,day,hour,minute,second;
-  Serial.println("let's sit time");
-  Serial.println("year");
-  year=Serial.read();
-  Serial.println("month");
-  month=Serial.read();
-  Serial.println("day");
-  day=Serial.read();
-  rtc.setDate(day,month,year);
-  Serial.println("hour");
-  hour=Serial.read();
-  Serial.println("minute");
-  minute=Serial.read();
-  Serial.println("second");
-  second=Serial.read();
-  rtc.setTime(22, 47, 30);
+  rtc.halt(false);
+  rtc.writeProtect(false);
+  lcd.clear();
+  int years, month, day, hours, minute, second,temp;
+  lcd.print("TIME SITTING");
+  /*Serial.println ("year");
+  years = Sread();
+  Serial.println(years);
+  delay("1000");
+  temp=Sread();
+  Serial.println ("month");
+  month = Sread();
+  Serial.println(month);
+  delay("1000");
+  temp=Sread();
+  Serial.println ("day");
+  day = Sread();
+  Serial.println(day);
+  temp=Sread();
+  rtc.setDate(19, 3, 2020);*/
+  delay("1000");
+  Serial.println ("hours");
+  hours = Sread();
+  Serial.println(hours);
+  delay("1000");
+  temp=Sread();
+  Serial.println ("minute");
+  minute = Sread();
+  Serial.println(minute);
+  delay("1000");
+  temp=Sread();
+  Serial.println ("second");
+  second = Sread();
+  Serial.println(second);
+  rtc.setTime(hours, minute, second);
+  Serial.println(rtc.getTimeStr());
+  return;
+  //Serial.println(rtc.getDateStr());
+
+}
+int Sread()
+{
+  while (1)
+  {
+    while (Serial.available() > 0)
+    {
+      //Serial.println("got it");
+      int a=Serial.parseInt();
+      return a;
+      break;
+    }
+  }
 }
 /* TESTING
-void fileReBuild ()
-{
+  void fileReBuild ()
+  {
     lcd.clear();
     char key = keypad.getKey();
     if (key != NO_KEY)
@@ -158,5 +208,5 @@ void fileReBuild ()
     lcd.setCursor(5, 1);
     lcd.print(input);
     delay(100);
-}*/
+  }*/
 //Serial.println("你要输出的内容)
