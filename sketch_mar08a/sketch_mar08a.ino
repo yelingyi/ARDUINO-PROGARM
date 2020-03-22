@@ -10,7 +10,7 @@
 
 SR04 sr04 = SR04(ECHO_PIN,TRIG_PIN);
 
-int guide=2000;
+int guide=150;
 const byte ROWS = 4;
 const byte COLS = 4;
 char keys[ROWS][COLS] = {
@@ -58,6 +58,7 @@ void setup ()
   Serial.println(sr04.Distance());
 }
 void loop() {
+  Serial.println(sr04.Distance());
   if   (safemode)
       if(guide>sr04.Distance())
       {
